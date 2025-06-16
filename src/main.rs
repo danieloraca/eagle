@@ -11,34 +11,23 @@ use draw_text::draw_number;
 mod sound;
 use sound::{SineWave, play_pitched_tone, saw_wave, square_wave, play_noise_boom};
 
+mod utils;
+use utils::{
+    blend_color,
+    distance_squared,
+};
+
+mod space_objects;
+use space_objects::{
+    Star,
+    BigStar,    
+};
+
 const WIDTH: usize = 800;
 const HEIGHT: usize = 600;
 const NUM_PARTICLES: usize = 40;
 const NUM_STARS: usize = 1000;
 
-struct Star {
-    x: f32,
-    y: f32,
-    z: f32,
-}
-
-struct BigStar {
-    x: f32,
-    y: f32,
-    z: f32,
-    hit: bool,
-}
-
-fn blend_color(r: u8, g: u8, b: u8, alpha: f32) -> u32 {
-    let r = (r as f32 * alpha) as u32;
-    let g = (g as f32 * alpha) as u32;
-    let b = (b as f32 * alpha) as u32;
-    (r << 16) | (g << 8) | b
-}
-
-fn distance_squared(x1: f32, y1: f32, x2: f32, y2: f32) -> f32 {
-    (x2 - x1).powi(2) + (y2 - y1).powi(2)
-}
 
 fn main() {
     let mut window = Window::new(
