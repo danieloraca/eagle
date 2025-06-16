@@ -1,0 +1,16 @@
+[package]
+name = "eagle"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+minifb = "0.28.0"
+rand = "0.9.1"
+rodio = "0.20.1"
+
+[profile.release]
+lto = true
+strip = true
+opt-level = 3
+panic = 'abort'
+codegen-units = 1
