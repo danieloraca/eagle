@@ -6,7 +6,7 @@ mod particles;
 use particles::Particle;
 
 mod draw_text;
-use draw_text::draw_number;
+use draw_text::{draw_number, draw_text};
 
 mod sound;
 use sound::{play_noise_boom, play_pitched_tone, saw_wave, square_wave};
@@ -381,6 +381,8 @@ fn main() {
 
         draw_number(&mut buffer, WIDTH, 10, 10, collision_count, 0xffffff, 4); // white color
         draw_number(&mut buffer, WIDTH, 10, 40, missed_count, 0xff0000, 4); // red color
+
+        draw_text(&mut buffer, WIDTH, 350, 550, "HELLO", 0xFF00FF00, 4);
 
         if missed_count >= MAX_ESCAPED {
 
