@@ -9,27 +9,22 @@ mod draw_text;
 use draw_text::draw_number;
 
 mod sound;
-use sound::{play_pitched_tone, saw_wave, square_wave, play_noise_boom};
+use sound::{play_noise_boom, play_pitched_tone, saw_wave, square_wave};
 
 mod utils;
-use utils::{
-    blend_color,
-    distance_squared,
-};
+use utils::{blend_color, distance_squared};
 
 mod space_objects;
-use space_objects::{
-    Star,
-    BigStar,
-};
+use space_objects::{BigStar, Star};
 
 const WIDTH: usize = 800;
 const HEIGHT: usize = 600;
 const NUM_PARTICLES: usize = 40;
 const NUM_STARS: usize = 1000;
+const MAX_ESCAPED: usize = 10;
+const MAX_HITS: usize = 10;
 
-fn draw_stars() -> Vec<Star>
-{
+fn draw_stars() -> Vec<Star> {
     let mut rng = rand::rng();
 
     // Initialize stars
@@ -87,6 +82,7 @@ fn main() {
 
     // Particle container
     let mut particles: Vec<Particle> = Vec::new();
+    let mut missed_count = 0;
 
     let mut buffer = vec![0u32; WIDTH * HEIGHT];
 
@@ -137,15 +133,25 @@ fn main() {
             });
         }
 
+        let mut missed_this_frame = 0;
         // Update and draw big stars
         for big_star in big_stars.iter_mut() {
             big_star.z -= rng.random_range(0.002..0.006); // slower than normal stars
 
-            if big_star.z <= 0.1 {
-                // Respawn far away if it gets too close
+            // Check if the star is off-screen or too close
+            let is_off_screen = big_star.is_off_screen(WIDTH, HEIGHT);
+            let is_too_close = big_star.z <= 0.1;
+
+            if is_off_screen || is_too_close {
+                if !big_star.hit {
+                    missed_this_frame += 1; // Increment temporary counter
+                }
+                // Respawn far away
                 big_star.x = rng.random_range(-1.5..1.5);
                 big_star.y = rng.random_range(-1.5..1.5);
                 big_star.z = 2.5 + rng.random_range(0.0..1.0);
+                big_star.hit = false;
+                continue; // Skip drawing for respawned stars
             }
 
             let sx = (big_star.x / big_star.z * WIDTH as f32 / 2.0 + WIDTH as f32 / 2.0) as isize;
@@ -231,6 +237,13 @@ fn main() {
             }
         }
 
+        // Update missed_count after processing all big stars
+        missed_count += missed_this_frame;
+        if missed_this_frame > 0 {
+            println!("Missed {} star(s)! Total missed: {}", missed_this_frame, missed_count);
+        }
+
+        // Remove hit big stars
         big_stars.retain(|star| !star.hit);
 
         // --- Move ship with arrow keys ---
@@ -348,22 +361,30 @@ fn main() {
             shake_timer -= 1.0 / 60.0; // assuming 60 FPS
         }
 
-        let draw_x = ship_x as f32 + shake_offset_x;
-        let draw_y = ship_y as f32 + shake_offset_y;
+        let draw_x = (ship_x as f32 + shake_offset_x).round() as isize;
+        let draw_y = (ship_y as f32 + shake_offset_y).round() as isize;
 
         //draw ship
-        for dy in -2..=2 {
-            for dx in -2..=2 {
-                let px = draw_x as i32 + dx;
-                let py = draw_y as i32 + dy;
-                if px >= 0 && px < WIDTH as i32 && py >= 0 && py < HEIGHT as i32 {
-                    buffer[py as usize * WIDTH + px as usize] = 0xFFAA00;
+        for dy in -1..=1 {
+            for dx in -1..=1 {
+                if (dx == 0 || dy == 0)
+                    && draw_x + dx >= 0
+                    && draw_x + dx < WIDTH as isize
+                    && draw_y + dy >= 0
+                    && draw_y + dy < HEIGHT as isize
+                {
+                    let index = (draw_y + dy) as usize * WIDTH + (draw_x + dx) as usize;
+                    buffer[index] = 0xFFFFFF; // white cross
                 }
             }
         }
 
         draw_number(&mut buffer, WIDTH, 10, 10, collision_count, 0xffffff, 4); // white color
+        draw_number(&mut buffer, WIDTH, 10, 40, missed_count, 0xff0000, 4); // red color
 
+        if missed_count >= MAX_ESCAPED {
+
+        }
         // --- Update window buffer ---
         window.update_with_buffer(&buffer, WIDTH, HEIGHT).unwrap();
     }
