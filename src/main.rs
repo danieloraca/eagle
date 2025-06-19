@@ -9,7 +9,7 @@ mod draw_text;
 use draw_text::draw_number;
 
 mod sound;
-use sound::{SineWave, play_pitched_tone, saw_wave, square_wave, play_noise_boom};
+use sound::{play_pitched_tone, saw_wave, square_wave, play_noise_boom};
 
 mod utils;
 use utils::{
@@ -20,7 +20,7 @@ use utils::{
 mod space_objects;
 use space_objects::{
     Star,
-    BigStar,    
+    BigStar,
 };
 
 const WIDTH: usize = 800;
@@ -28,6 +28,21 @@ const HEIGHT: usize = 600;
 const NUM_PARTICLES: usize = 40;
 const NUM_STARS: usize = 1000;
 
+fn draw_stars() -> Vec<Star>
+{
+    let mut rng = rand::rng();
+
+    // Initialize stars
+    let stars: Vec<Star> = (0..NUM_STARS)
+        .map(|_| Star {
+            x: rng.random_range(-1.0..1.0),
+            y: rng.random_range(-1.0..1.0),
+            z: rng.random_range(0.1..1.0),
+        })
+        .collect();
+
+    stars
+}
 
 fn main() {
     let mut window = Window::new(
@@ -43,15 +58,15 @@ fn main() {
     let (_stream, stream_handle) = OutputStream::try_default().unwrap();
     let sink = Sink::try_new(&stream_handle).unwrap();
 
-    let beep = SineWave {
-        freq: 440.0, // A4 note
-        sample_rate: 44100,
-        duration_samples: 44100 / 2, // 0.5 seconds
-        t: 0,
-    };
+    // let beep = SineWave {
+    //     freq: 440.0, // A4 note
+    //     sample_rate: 44100,
+    //     duration_samples: 44100 / 2, // 0.5 seconds
+    //     t: 0,
+    // };
 
-    sink.append(beep);
-    sink.sleep_until_end();
+    // sink.append(beep);
+    // sink.sleep_until_end();
 
     let mut rng = rand::rng();
     let mut screen_shake_timer = 0;
@@ -62,13 +77,7 @@ fn main() {
     let (_stream, stream_handle) = OutputStream::try_default().unwrap();
 
     // Initialize stars
-    let mut stars: Vec<Star> = (0..NUM_STARS)
-        .map(|_| Star {
-            x: rng.random_range(-1.0..1.0),
-            y: rng.random_range(-1.0..1.0),
-            z: rng.random_range(0.1..1.0),
-        })
-        .collect();
+    let mut stars: Vec<Star> = draw_stars();
 
     let mut big_stars: Vec<BigStar> = Vec::new();
 
@@ -240,7 +249,7 @@ fn main() {
 
         // --- Spawn particles when pressing Space ---
         if window.is_key_down(Key::Space) && space_cooldown_timer <= 0.0 {
-            space_cooldown_timer = 0.3;
+            space_cooldown_timer = 0.1;
             play_pitched_tone(500.0, 0.35, square_wave, &stream_handle); // laser zap
             //play_pitched_tone(220.0, 0.4, triangle_wave, &stream_handle); // power hum
 
