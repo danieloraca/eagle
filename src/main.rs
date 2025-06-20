@@ -240,7 +240,11 @@ fn main() {
         // Update missed_count after processing all big stars
         missed_count += missed_this_frame;
         if missed_this_frame > 0 {
-            println!("Missed {} star(s)! Total missed: {}", missed_this_frame, missed_count);
+            play_pitched_tone(200.0, 0.35, square_wave, &stream_handle); // laser zap
+            println!(
+                "Missed {} star(s)! Total missed: {}",
+                missed_this_frame, missed_count
+            );
         }
 
         // Remove hit big stars
@@ -382,11 +386,9 @@ fn main() {
         draw_number(&mut buffer, WIDTH, 10, 10, collision_count, 0xffffff, 4); // white color
         draw_number(&mut buffer, WIDTH, 10, 40, missed_count, 0xff0000, 4); // red color
 
-        draw_text(&mut buffer, WIDTH, 350, 550, "HELLO", 0xFF00FF00, 4);
+        draw_text(&mut buffer, WIDTH, 10, 580, "eagle", 0xFF00FF00, 2);
 
-        if missed_count >= MAX_ESCAPED {
-
-        }
+        if missed_count >= MAX_ESCAPED {}
         // --- Update window buffer ---
         window.update_with_buffer(&buffer, WIDTH, HEIGHT).unwrap();
     }
