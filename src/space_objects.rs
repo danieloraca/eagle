@@ -9,6 +9,7 @@ pub struct BigStar {
     pub y: f32,
     pub z: f32,
     pub hit: bool,
+    pub was_missed: bool,
 }
 
 impl BigStar {

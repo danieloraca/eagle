@@ -1,5 +1,5 @@
-use std::f32::consts::PI;
 use rodio::{Sink, Source};
+use std::f32::consts::PI;
 use std::time::Duration;
 
 pub struct SineWave {
@@ -166,6 +166,25 @@ pub fn play_noise_boom(duration: f32, stream_handle: &rodio::OutputStreamHandle)
             t: 0,
         };
         sink.append(burst);
+        sink.detach();
+    }
+}
+
+pub fn _play_combo(
+    tones: &[(f32, f32, fn(f32) -> f32)],
+    stream_handle: &rodio::OutputStreamHandle,
+) {
+    if let Ok(sink) = Sink::try_new(stream_handle) {
+        for &(freq, dur, wave) in tones {
+            let tone = PitchedTone {
+                freq,
+                sample_rate: 44100,
+                duration_samples: (dur * 44100.0) as u32,
+                t: 0,
+                waveform: wave,
+            };
+            sink.append(tone);
+        }
         sink.detach();
     }
 }
