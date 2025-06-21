@@ -116,27 +116,11 @@ fn main() {
             break;
         }
 
-        // --- Update window buffer ---
         if game.redemption_flash_timer > 0.0 {
-            let center_x: usize = draw_x as usize;
-            let center_y: usize = draw_y as usize;
-            let radius: i32 = (20.0 * (1.0 - game.redemption_flash_timer / 0.3)) as i32;
-
-            for angle in (0..360).step_by(12) {
-                let rad = (angle as f32).to_radians();
-                let x = center_x as isize + (radius as f32 * rad.cos()) as isize;
-                let y = center_y as isize + (radius as f32 * rad.sin()) as isize;
-
-                if x >= 0 && x < WIDTH as isize && y >= 0 && y < HEIGHT as isize {
-                    let idx = y as usize * WIDTH + x as usize;
-
-                    let fade = ((game.redemption_flash_timer / 0.3) * 255.0) as u8;
-                    let ring_color = (fade as u32) << 8; // Green with fade
-
-                    buffer[idx] = ring_color;
-                }
-            }
+            game.flash(&mut buffer, draw_x, draw_y, WIDTH, HEIGHT, "green");
         }
+
+        // --- Update window buffer ---
         window.update_with_buffer(&buffer, WIDTH, HEIGHT).unwrap();
     }
 }

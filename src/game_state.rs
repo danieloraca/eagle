@@ -409,6 +409,39 @@ impl GameState {
         });
     }
 
+    pub fn flash(&mut self, buffer: &mut [u32], draw_x: isize, draw_y: isize, width: usize, height: usize, color: &str) {
+        let center_x: usize = draw_x as usize;
+        let center_y: usize = draw_y as usize;
+        let radius: i32 = (30.0 * (1.0 - self.redemption_flash_timer / 0.7)) as i32;
+
+        for angle in (0..360).step_by(3) {
+            let rad: f32 = (angle as f32).to_radians();
+            let x: isize = center_x as isize + (radius as f32 * rad.cos()) as isize;
+            let y: isize = center_y as isize + (radius as f32 * rad.sin()) as isize;
+
+            if x >= 0 && x < width as isize && y >= 0 && y < height as isize {
+                let idx: usize = y as usize * width + x as usize;
+
+                let fade: u8 = ((self.redemption_flash_timer / 0.3) * 255.0) as u8;
+                match color {
+                    "red" => {
+                        buffer[idx] = (fade as u32) << 16; // Red with fade
+                    }
+                    "green" => {
+                        buffer[idx] = (fade as u32) << 8; // Green with fade
+                    }
+                    "blue" => {
+                        buffer[idx] = fade as u32; // Blue with fade
+                    }
+                    _ => {
+                        buffer[idx] = 0xFFFFFF; // Default to white if color not recognized
+                    }
+                    
+                }
+            }
+        }
+    }
+
     pub fn reset_shake(&mut self) {
         self.screen_shake_timer = 10;
         self.shake_duration = 0.5;
