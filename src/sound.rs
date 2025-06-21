@@ -16,8 +16,8 @@ impl Iterator for SineWave {
             return None;
         }
 
-        let progress = self.t as f32 / self.duration_samples as f32;
-        let envelope = 1.0 - progress; // linear fade out
+        let progress: f32 = self.t as f32 / self.duration_samples as f32;
+        let envelope: f32 = 1.0 - progress; // linear fade out
 
         let sample = (2.0 * PI * self.freq * self.t as f32 / self.sample_rate as f32).sin();
         self.t += 1;
@@ -55,8 +55,8 @@ impl Iterator for NoiseBurst {
             return None;
         }
 
-        let progress = self.t as f32 / self.duration_samples as f32;
-        let envelope = 1.0 - progress;
+        let progress: f32 = self.t as f32 / self.duration_samples as f32;
+        let envelope: f32 = 1.0 - progress;
 
         self.t += 1;
         let sample = rand::random::<f32>() * 2.0 - 1.0; // white noise [-1.0, 1.0]
@@ -96,11 +96,11 @@ impl Iterator for PitchedTone {
             return None;
         }
 
-        let progress = self.t as f32 / self.duration_samples as f32;
-        let envelope = 1.0 - progress; // linear fade out
+        let progress: f32 = self.t as f32 / self.duration_samples as f32;
+        let envelope: f32 = 1.0 - progress; // linear fade out
 
-        let phase = (self.freq * self.t as f32 / self.sample_rate as f32) % 1.0;
-        let value = (self.waveform)(phase) * envelope * 0.3;
+        let phase: f32 = (self.freq * self.t as f32 / self.sample_rate as f32) % 1.0;
+        let value: f32 = (self.waveform)(phase) * envelope * 0.3;
 
         self.t += 1;
         Some(value)
@@ -147,7 +147,7 @@ pub fn play_pitched_tone(
     stream_handle: &rodio::OutputStreamHandle,
 ) {
     if let Ok(sink) = Sink::try_new(stream_handle) {
-        let tone = PitchedTone {
+        let tone: PitchedTone = PitchedTone {
             freq,
             sample_rate: 44100,
             duration_samples: (duration * 44100.0) as u32,
@@ -161,7 +161,7 @@ pub fn play_pitched_tone(
 
 pub fn play_noise_boom(duration: f32, stream_handle: &rodio::OutputStreamHandle) {
     if let Ok(sink) = Sink::try_new(stream_handle) {
-        let burst = NoiseBurst {
+        let burst: NoiseBurst = NoiseBurst {
             duration_samples: (duration * 44100.0) as u32,
             t: 0,
         };
@@ -176,7 +176,7 @@ pub fn _play_combo(
 ) {
     if let Ok(sink) = Sink::try_new(stream_handle) {
         for &(freq, dur, wave) in tones {
-            let tone = PitchedTone {
+            let tone: PitchedTone = PitchedTone {
                 freq,
                 sample_rate: 44100,
                 duration_samples: (dur * 44100.0) as u32,

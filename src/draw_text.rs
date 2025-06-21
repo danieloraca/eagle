@@ -96,7 +96,7 @@ pub const LETTERS: [[u8; 7]; 26] = [
 
 pub fn get_symbols() -> HashMap<char, [u8; 7]> {
     use std::collections::HashMap;
-    let mut symbols = HashMap::new();
+    let mut symbols: HashMap<char, [u8; 7]> = HashMap::new();
 
     symbols.insert(
         ':',
@@ -171,15 +171,15 @@ fn draw_digit(
     color: u32,
     scale: usize,
 ) {
-    let font = FONT[digit];
+    let font: [u8; 5] = FONT[digit];
     for (dy, row) in font.iter().enumerate() {
         for dx in 0..5 {
             if (row >> (4 - dx)) & 1 == 1 {
                 // Draw a scale x scale block
                 for sy in 0..scale {
                     for sx in 0..scale {
-                        let px = x + dx * scale + sx;
-                        let py = y + dy * scale + sy;
+                        let px: usize = x + dx * scale + sx;
+                        let py: usize = y + dy * scale + sy;
                         if px < width && py < buffer.len() / width {
                             buffer[py * width + px] = color;
                         }
@@ -225,16 +225,16 @@ fn draw_letter(
     scale: usize,
 ) {
     if ch.is_ascii_alphabetic() {
-        let index = (ch.to_ascii_uppercase() as u8 - b'A') as usize;
+        let index: usize = (ch.to_ascii_uppercase() as u8 - b'A') as usize;
         if index < 26 {
-            let font = LETTERS[index];
+            let font: [u8; 7] = LETTERS[index];
             for (dy, row) in font.iter().enumerate() {
                 for dx in 0..5 {
                     if (row >> (4 - dx)) & 1 == 1 {
                         for sy in 0..scale {
                             for sx in 0..scale {
-                                let px = x + dx * scale + sx;
-                                let py = y + dy * scale + sy;
+                                let px: usize = x + dx * scale + sx;
+                                let py: usize = y + dy * scale + sy;
                                 if px < width && py < buffer.len() / width {
                                     buffer[py * width + px] = color;
                                 }
@@ -256,10 +256,10 @@ pub fn draw_text(
     color: u32,
     scale: usize,
 ) {
-    let symbols = get_symbols();
+    let symbols: HashMap<char, [u8; 7]> = get_symbols();
 
     for (i, ch) in text.chars().enumerate() {
-        let px = x + i * (5 * scale + scale);
+        let px: usize = x + i * (5 * scale + scale);
 
         if ch.is_ascii_digit() {
             draw_digit(
@@ -293,8 +293,8 @@ fn draw_custom_glyph(
             if (row >> (4 - dx)) & 1 == 1 {
                 for sy in 0..scale {
                     for sx in 0..scale {
-                        let px = x + dx * scale + sx;
-                        let py = y + dy * scale + sy;
+                        let px: usize = x + dx * scale + sx;
+                        let py: usize = y + dy * scale + sy;
                         if px < width && py < buffer.len() / width {
                             buffer[py * width + px] = color;
                         }

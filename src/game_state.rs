@@ -89,7 +89,7 @@ impl GameState {
         }
 
         self.update_starfield(buffer, width, height); // (if you’ve made this)
-        let missed = self.update_big_stars(buffer, width, height);
+        let missed: usize = self.update_big_stars(buffer, width, height);
         if missed > 0 {
             self.missed_count += missed;
             crate::sound::play_pitched_tone(50.0, 0.25, crate::sound::square_wave, stream_handle);
@@ -114,13 +114,13 @@ impl GameState {
             }
 
             // Project 3D -> 2D
-            let sx = (star.x / star.z * width as f32 / 2.0 + width as f32 / 2.0) as isize;
-            let sy = (star.y / star.z * height as f32 / 2.0 + height as f32 / 2.0) as isize;
+            let sx: isize = (star.x / star.z * width as f32 / 2.0 + width as f32 / 2.0) as isize;
+            let sy: isize = (star.y / star.z * height as f32 / 2.0 + height as f32 / 2.0) as isize;
 
             // Draw if on screen
             if sx >= 0 && sx < width as isize && sy >= 0 && sy < height as isize {
-                let brightness = ((1.0 - star.z) * 255.0) as u32;
-                let color = (brightness << 16) | (brightness << 8) | brightness;
+                let brightness: u32 = ((1.0 - star.z) * 255.0) as u32;
+                let color: u32 = (brightness << 16) | (brightness << 8) | brightness;
                 buffer[sy as usize * width + sx as usize] = color;
             }
         }
@@ -138,14 +138,14 @@ impl GameState {
             return (0.0, 0.0);
         }
 
-        let progress = 1.0 - (self.shake_timer / self.shake_duration);
-        let amplitude = 5.0 * (1.0 - progress);
-        let frequency = 30.0;
+        let progress: f32 = 1.0 - (self.shake_timer / self.shake_duration);
+        let amplitude: f32 = 5.0 * (1.0 - progress);
+        let frequency: f32 = 30.0;
 
         self.shake_timer -= 1.0 / 60.0;
 
-        let shake_x = (progress * frequency * std::f32::consts::TAU).sin() * amplitude;
-        let shake_y = ((progress * frequency + 0.5) * std::f32::consts::TAU).sin() * amplitude;
+        let shake_x: f32 = (progress * frequency * std::f32::consts::TAU).sin() * amplitude;
+        let shake_y: f32 = ((progress * frequency + 0.5) * std::f32::consts::TAU).sin() * amplitude;
 
         (shake_x, shake_y)
     }
@@ -160,15 +160,15 @@ impl GameState {
         offset_y: f32,
     ) {
         let mut rng = rand::rng();
-        let ship_x = self.ship_x as f32 + offset_x;
-        let ship_y = self.ship_y as f32 + offset_y;
+        let ship_x: f32 = self.ship_x as f32 + offset_x;
+        let ship_y: f32 = self.ship_y as f32 + offset_y;
 
         // Step 1: Find indices of stars to explode
         let mut to_explode = vec![];
 
         for (i, star) in self.big_stars.iter().enumerate() {
-            let px = star.x / star.z * width as f32 / 2.0 + width as f32 / 2.0;
-            let py = star.y / star.z * height as f32 / 2.0 + height as f32 / 2.0;
+            let px: f32 = star.x / star.z * width as f32 / 2.0 + width as f32 / 2.0;
+            let py: f32 = star.y / star.z * height as f32 / 2.0 + height as f32 / 2.0;
 
             if !star.hit && distance_squared(px, py, ship_x, ship_y) < 12.0 {
                 to_explode.push(i);
@@ -177,7 +177,7 @@ impl GameState {
 
         // Step 2: Mutate stars and GameState after borrow ends
         for i in to_explode {
-            let star = &mut self.big_stars[i];
+            let star: &mut BigStar = &mut self.big_stars[i];
             star.hit = true;
 
             self.reset_shake();
@@ -194,7 +194,7 @@ impl GameState {
             );
 
             for _ in 0..num_particles {
-                let life = rng.random_range(50..100);
+                let life: u32 = rng.random_range(50..100);
                 self.particles.push(crate::particles::Particle {
                     x: ship_x,
                     y: ship_y,
@@ -206,7 +206,7 @@ impl GameState {
             }
         }
 
-        self.big_stars.retain(|s| !s.hit);
+        self.big_stars.retain(|s: &BigStar| !s.hit);
     }
 
     pub fn handle_input(
@@ -239,11 +239,11 @@ impl GameState {
 
             play_pitched_tone(500.0, 0.35, square_wave, stream_handle);
 
-            let mut to_explode = vec![];
+            let mut to_explode: Vec<usize> = vec![];
 
             for (i, star) in self.big_stars.iter_mut().enumerate() {
-                let px = star.x / star.z * width as f32 / 2.0 + width as f32 / 2.0;
-                let py = star.y / star.z * height as f32 / 2.0 + height as f32 / 2.0;
+                let px: f32 = star.x / star.z * width as f32 / 2.0 + width as f32 / 2.0;
+                let py: f32 = star.y / star.z * height as f32 / 2.0 + height as f32 / 2.0;
 
                 if !star.hit
                     && distance_squared(px, py, self.ship_x as f32, self.ship_y as f32) < 900.0
@@ -253,7 +253,7 @@ impl GameState {
             }
 
             for i in to_explode {
-                let star = &mut self.big_stars[i];
+                let star: &mut BigStar = &mut self.big_stars[i];
                 star.hit = true;
                 self.reset_shake();
                 play_noise_boom(0.1, stream_handle);
@@ -265,7 +265,7 @@ impl GameState {
                 );
 
                 for _ in 0..num_particles {
-                    let life = rng.random_range(50..100);
+                    let life: u32 = rng.random_range(50..100);
                     self.particles.push(crate::particles::Particle {
                         x: self.ship_x as f32,
                         y: self.ship_y as f32,
@@ -303,8 +303,8 @@ impl GameState {
             star.z -= rng.random_range(0.002..0.006);
 
             // Out of bounds or too close
-            let off_screen = star.is_off_screen(width, height);
-            let too_close = star.z <= 0.1;
+            let off_screen: bool = star.is_off_screen(width, height);
+            let too_close: bool = star.z <= 0.1;
 
             if off_screen || too_close {
                 if !star.hit && !star.was_missed {
@@ -320,24 +320,24 @@ impl GameState {
                 continue;
             }
 
-            let sx = (star.x / star.z * width as f32 / 2.0 + width as f32 / 2.0) as isize;
-            let sy = (star.y / star.z * height as f32 / 2.0 + height as f32 / 2.0) as isize;
+            let sx: isize = (star.x / star.z * width as f32 / 2.0 + width as f32 / 2.0) as isize;
+            let sy: isize = (star.y / star.z * height as f32 / 2.0 + height as f32 / 2.0) as isize;
 
-            let px = star.x / star.z * width as f32 / 2.0 + width as f32 / 2.0;
-            let py = star.y / star.z * height as f32 / 2.0 + height as f32 / 2.0;
-            let dist2 = distance_squared(px, py, self.ship_x as f32, self.ship_y as f32);
-            let proximity_sq = 900.0;
+            let px: f32 = star.x / star.z * width as f32 / 2.0 + width as f32 / 2.0;
+            let py: f32 = star.y / star.z * height as f32 / 2.0 + height as f32 / 2.0;
+            let dist2: f32 = distance_squared(px, py, self.ship_x as f32, self.ship_y as f32);
+            let proximity_sq: f32 = 900.0;
 
             if dist2 < proximity_sq && !star.hit {
                 // Draw red outline box
-                let red = 0xFF0000;
+                let red: u32 = 0xFF0000;
                 for oy in -4..=4 {
                     for ox in -4..=4 {
                         if (ox as isize).abs() == 4 || (oy as isize).abs() == 4 {
-                            let bx = sx + ox;
-                            let by = sy + oy;
+                            let bx: isize = sx + ox;
+                            let by: isize = sy + oy;
                             if bx >= 0 && bx < width as isize && by >= 0 && by < height as isize {
-                                let idx = by as usize * width + bx as usize;
+                                let idx: usize = by as usize * width + bx as usize;
                                 buffer[idx] = red;
                             }
                         }
@@ -347,7 +347,7 @@ impl GameState {
 
             // Draw the big star (a 3x3 or blended blob)
             if sx >= 1 && sx < width as isize - 1 && sy >= 1 && sy < height as isize - 1 {
-                let color = blend_color(
+                let color: u32 = blend_color(
                     rng.random_range(150..250),
                     rng.random_range(100..200),
                     rng.random_range(0..250),
@@ -356,10 +356,10 @@ impl GameState {
 
                 for dy in -1..=1 {
                     for dx in -1..=1 {
-                        let px = sx + dx;
-                        let py = sy + dy;
+                        let px: isize = sx + dx;
+                        let py: isize = sy + dy;
                         if px >= 0 && px < width as isize && py >= 0 && py < height as isize {
-                            let idx = py as usize * width + px as usize;
+                            let idx: usize = py as usize * width + px as usize;
                             buffer[idx] = color;
                         }
                     }
@@ -371,16 +371,16 @@ impl GameState {
     }
 
     pub fn update_particles(&mut self, buffer: &mut [u32], width: usize, height: usize) {
-        self.particles.retain_mut(|p| {
+        self.particles.retain_mut(|p: &mut Particle| {
             p.x += p.vx;
             p.y += p.vy;
             p.life = p.life.saturating_sub(1);
 
             if p.x >= 1.0 && p.x < (width - 1) as f32 && p.y >= 1.0 && p.y < (height - 1) as f32 {
-                let cx = p.x as usize;
-                let cy = p.y as usize;
-                let base_r = 255.0 * (p.life as f32 / p.initial_life as f32);
-                let base_g = 170.0 * (p.life as f32 / p.initial_life as f32);
+                let cx: usize = p.x as usize;
+                let cy: usize = p.y as usize;
+                let base_r: f32 = 255.0 * (p.life as f32 / p.initial_life as f32);
+                let base_g: f32 = 170.0 * (p.life as f32 / p.initial_life as f32);
 
                 let positions = [
                     (0, 0, 1.0),   // center
@@ -395,11 +395,11 @@ impl GameState {
                 ];
 
                 for (dx, dy, alpha) in positions {
-                    let px = cx as isize + dx;
-                    let py = cy as isize + dy;
+                    let px: isize = cx as isize + dx;
+                    let py: isize = cy as isize + dy;
                     if px >= 0 && px < width as isize && py >= 0 && py < height as isize {
-                        let index = py as usize * width + px as usize;
-                        let color = blend_color(base_r as u8, base_g as u8, 0, alpha as f32);
+                        let index: usize = py as usize * width + px as usize;
+                        let color: u32 = blend_color(base_r as u8, base_g as u8, 0, alpha as f32);
                         buffer[index] = color;
                     }
                 }
@@ -420,9 +420,9 @@ impl GameState {
             return (0.0, 0.0);
         }
 
-        let progress = 1.0 - (self.shake_timer / self.shake_duration);
-        let amplitude = 5.0 * (1.0 - progress);
-        let frequency = 30.0;
+        let progress: f32 = 1.0 - (self.shake_timer / self.shake_duration);
+        let amplitude: f32 = 5.0 * (1.0 - progress);
+        let frequency: f32 = 30.0;
 
         self.shake_timer -= 1.0 / 60.0;
 
@@ -445,12 +445,12 @@ fn draw_stars(stars: &mut Vec<Star>, buffer: &mut [u32], width: usize, height: u
             star.z = 1.0;
         }
 
-        let sx = (star.x / star.z * width as f32 / 2.0 + width as f32 / 2.0) as isize;
-        let sy = (star.y / star.z * height as f32 / 2.0 + height as f32 / 2.0) as isize;
+        let sx: isize = (star.x / star.z * width as f32 / 2.0 + width as f32 / 2.0) as isize;
+        let sy: isize = (star.y / star.z * height as f32 / 2.0 + height as f32 / 2.0) as isize;
 
         if sx >= 0 && sx < width as isize && sy >= 0 && sy < height as isize {
-            let brightness = ((1.0 - star.z.min(1.0)) * 255.0) as u32;
-            let color = (brightness << 16) | (brightness << 8) | brightness;
+            let brightness: u32 = ((1.0 - star.z.min(1.0)) * 255.0) as u32;
+            let color: u32 = (brightness << 16) | (brightness << 8) | brightness;
             buffer[sy as usize * width + sx as usize] = color;
         }
     }

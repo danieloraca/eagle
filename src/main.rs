@@ -22,7 +22,7 @@ const NUM_STARS: usize = 1000;
 const MAX_ESCAPED: usize = 10;
 
 fn main() {
-    let mut window = Window::new(
+    let mut window: Window = Window::new(
         "Starfield + Ship + Particles - ESC to exit",
         WIDTH,
         HEIGHT,
@@ -32,15 +32,15 @@ fn main() {
 
     window.set_target_fps(60);
 
-    let mut game = GameState::new(WIDTH, HEIGHT, NUM_STARS);
+    let mut game: GameState = GameState::new(WIDTH, HEIGHT, NUM_STARS);
     let (_stream, stream_handle) = OutputStream::try_default().unwrap();
-    let mut rng = rand::rng();
-    let mut buffer = vec![0u32; WIDTH * HEIGHT];
+    let mut rng: rand::prelude::ThreadRng = rand::rng();
+    let mut buffer: Vec<u32> = vec![0u32; WIDTH * HEIGHT];
 
     while window.is_open() && !window.is_key_down(Key::Escape) {
         game.update(&window, &mut buffer, WIDTH, HEIGHT, &stream_handle);
-        let mut shake_x = 0;
-        let mut shake_y = 0;
+        let mut shake_x: i32 = 0;
+        let mut shake_y: i32 = 0;
         if game.screen_shake_timer > 0 {
             shake_x = rng.random_range(-2..=2);
             shake_y = rng.random_range(-2..=2);
@@ -68,8 +68,8 @@ fn main() {
 
         let (shake_offset_x, shake_offset_y) = game.shake_offsets();
 
-        let draw_x = (game.ship_x as f32 + shake_offset_x).round() as isize;
-        let draw_y = (game.ship_y as f32 + shake_offset_y).round() as isize;
+        let draw_x: isize = (game.ship_x as f32 + shake_offset_x).round() as isize;
+        let draw_y: isize = (game.ship_y as f32 + shake_offset_y).round() as isize;
 
         //draw ship
         for dy in -1..=1 {
@@ -99,7 +99,7 @@ fn main() {
 
         draw_text(&mut buffer, WIDTH, 10, 580, "eagle", 0xFF00FF00, 2);
 
-        let elapsed_seconds = game.total_seconds / 60;
+        let elapsed_seconds: usize = game.total_seconds / 60;
         draw_text(&mut buffer, WIDTH, 650, 15, "Time(s):", 0xdddddd, 1);
         draw_number(&mut buffer, WIDTH, 700, 10, elapsed_seconds, 0xaaffaa, 3);
 
@@ -118,9 +118,9 @@ fn main() {
 
         // --- Update window buffer ---
         if game.redemption_flash_timer > 0.0 {
-            let center_x = draw_x as usize;
-            let center_y = draw_y as usize;
-            let radius = (20.0 * (1.0 - game.redemption_flash_timer / 0.3)) as i32;
+            let center_x: usize = draw_x as usize;
+            let center_y: usize = draw_y as usize;
+            let radius: i32 = (20.0 * (1.0 - game.redemption_flash_timer / 0.3)) as i32;
 
             for angle in (0..360).step_by(12) {
                 let rad = (angle as f32).to_radians();
