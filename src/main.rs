@@ -1,5 +1,4 @@
 use minifb::{Key, Window, WindowOptions};
-use rand::Rng;
 use rodio::OutputStream;
 
 mod particles;
@@ -34,28 +33,11 @@ fn main() {
 
     let mut game: GameState = GameState::new(WIDTH, HEIGHT, NUM_STARS);
     let (_stream, stream_handle) = OutputStream::try_default().unwrap();
-    let mut rng: rand::prelude::ThreadRng = rand::rng();
     let mut buffer: Vec<u32> = vec![0u32; WIDTH * HEIGHT];
 
     while window.is_open() && !window.is_key_down(Key::Escape) {
         game.update(&window, &mut buffer, WIDTH, HEIGHT, &stream_handle);
-        let mut shake_x: i32 = 0;
-        let mut shake_y: i32 = 0;
-        if game.screen_shake_timer > 0 {
-            shake_x = rng.random_range(-2..=2);
-            shake_y = rng.random_range(-2..=2);
-            game.screen_shake_timer -= 1;
-        }
-
-        // --- Check collisions with big stars ---
-        game.check_collisions(
-            &stream_handle,
-            WIDTH,
-            HEIGHT,
-            NUM_PARTICLES,
-            shake_x as f32,
-            shake_y as f32,
-        );
+        game.check_and_shake(&stream_handle, WIDTH, HEIGHT, NUM_PARTICLES);
 
         // Remove hit big stars
         game.big_stars.retain(|star| !star.hit);

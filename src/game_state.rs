@@ -442,6 +442,33 @@ impl GameState {
         }
     }
 
+    pub fn check_and_shake(
+        &mut self, 
+        stream_handle: &rodio::OutputStreamHandle,
+        width: usize,
+        height: usize,
+        num_particles: usize,
+    ) {
+        let mut rng = rand::rng();
+        let mut shake_x: i32 = 0;
+        let mut shake_y: i32 = 0;
+        if self.screen_shake_timer > 0 {
+            shake_x = rng.random_range(-2..=2);
+            shake_y = rng.random_range(-2..=2);
+            self.screen_shake_timer -= 1;
+        }
+
+        // --- Check collisions with big stars ---
+        self.check_collisions(
+            &stream_handle,
+            width,
+            height,
+            num_particles,
+            shake_x as f32,
+            shake_y as f32,
+        );
+    }
+
     pub fn reset_shake(&mut self) {
         self.screen_shake_timer = 10;
         self.shake_duration = 0.5;
