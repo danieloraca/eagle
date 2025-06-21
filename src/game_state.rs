@@ -24,6 +24,7 @@ pub struct GameState {
     pub redemption_flash_timer: f32,
     pub near_stars: Vec<Star>,
     pub far_stars: Vec<Star>,
+    pub big_star_spawned_count: u32,
 }
 
 impl GameState {
@@ -69,6 +70,7 @@ impl GameState {
             redemption_flash_timer: 0.0,
             near_stars: near_stars,
             far_stars: far_stars,
+            big_star_spawned_count: 0,
         }
     }
 
@@ -285,11 +287,24 @@ impl GameState {
     }
 
     pub fn update_big_stars(&mut self, buffer: &mut [u32], width: usize, height: usize) -> usize {
-        let mut rng = rand::rng();
-        let mut missed_this_frame = 0;
+        let mut rng: rand::prelude::ThreadRng = rand::rng();
+        let mut missed_this_frame: usize = 0;
+        
+        let seconds: f64 = self.total_seconds as f64;
+        let stars_per_second: f64 = 0.01 + (seconds / 5_000_000.0); // Very slow ramp-up
+        let expected_total: u32 = (seconds * stars_per_second).floor() as u32;
 
         // Occasionally spawn a new big star
-        if rng.random_ratio(1, 200) {
+        // if rng.random_ratio(1, 200) {
+        //     self.big_stars.push(BigStar {
+        //         x: rng.random_range(-1.5..1.5),
+        //         y: rng.random_range(-1.5..1.5),
+        //         z: 2.5 + rng.random_range(0.0..1.0),
+        //         hit: false,
+        //         was_missed: false,
+        //     });
+        // }
+        while self.big_star_spawned_count < expected_total {
             self.big_stars.push(BigStar {
                 x: rng.random_range(-1.5..1.5),
                 y: rng.random_range(-1.5..1.5),
@@ -297,6 +312,7 @@ impl GameState {
                 hit: false,
                 was_missed: false,
             });
+            self.big_star_spawned_count += 1;
         }
 
         for star in self.big_stars.iter_mut() {
