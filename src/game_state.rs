@@ -291,7 +291,7 @@ impl GameState {
         let mut missed_this_frame: usize = 0;
         
         let seconds: f64 = self.total_seconds as f64;
-        let stars_per_second: f64 = 0.01 + (seconds / 1_00_000.0); // Very slow ramp-up
+        let stars_per_second: f64 = 0.01 + (seconds / 1_000_000.0); // Very slow ramp-up
         let expected_total: u32 = (seconds * stars_per_second).floor() as u32;
 
         // Occasionally spawn a new big star
