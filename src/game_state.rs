@@ -291,7 +291,7 @@ impl GameState {
         let mut missed_this_frame: usize = 0;
         
         let seconds: f64 = self.total_seconds as f64;
-        let stars_per_second: f64 = 0.01 + (seconds / 5_000_000.0); // Very slow ramp-up
+        let stars_per_second: f64 = 0.01 + (seconds / 1_00_000.0); // Very slow ramp-up
         let expected_total: u32 = (seconds * stars_per_second).floor() as u32;
 
         // Occasionally spawn a new big star
@@ -370,13 +370,17 @@ impl GameState {
                     rng.random_range(0.7..1.0),
                 );
 
-                for dy in -1..=1 {
-                    for dx in -1..=1 {
-                        let px: isize = sx + dx;
-                        let py: isize = sy + dy;
-                        if px >= 0 && px < width as isize && py >= 0 && py < height as isize {
-                            let idx: usize = py as usize * width + px as usize;
-                            buffer[idx] = color;
+                let size: isize = ((1.0 / star.z) * 10.0).clamp(1.0, 6.0) as isize;
+
+                for dy in -size..=size {
+                    for dx in -size..=size {
+                        if dx*dx + dy*dy <= size*size {
+                            let px: isize = sx + dx;
+                            let py: isize = sy + dy;
+                            if px >= 0 && px < width as isize && py >= 0 && py < height as isize {
+                                let idx: usize = py as usize * width + px as usize;
+                                buffer[idx] = color;
+                            }
                         }
                     }
                 }
