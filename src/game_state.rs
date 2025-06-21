@@ -1,7 +1,7 @@
 use crate::particles::Particle;
 use crate::sound::{play_noise_boom, play_pitched_tone, saw_wave, square_wave};
 use crate::space_objects::{BigStar, Star};
-use crate::utils::{blend_color, distance_squared};
+use crate::utils::{blend_color, distance_squared, generate_big_star_color};
 use minifb::{Key, Window};
 use rand::Rng;
 
@@ -363,13 +363,6 @@ impl GameState {
 
             // Draw the big star (a 3x3 or blended blob)
             if sx >= 1 && sx < width as isize - 1 && sy >= 1 && sy < height as isize - 1 {
-                let color: u32 = blend_color(
-                    rng.random_range(150..250),
-                    rng.random_range(100..200),
-                    rng.random_range(0..250),
-                    rng.random_range(0.7..1.0),
-                );
-
                 let size: isize = ((1.0 / star.z) * 10.0).clamp(1.0, 6.0) as isize;
 
                 for dy in -size..=size {
@@ -379,7 +372,7 @@ impl GameState {
                             let py: isize = sy + dy;
                             if px >= 0 && px < width as isize && py >= 0 && py < height as isize {
                                 let idx: usize = py as usize * width + px as usize;
-                                buffer[idx] = color;
+                                buffer[idx] = generate_big_star_color();
                             }
                         }
                     }
