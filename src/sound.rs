@@ -1,6 +1,7 @@
 use rodio::{Sink, Source};
 use std::f32::consts::PI;
 use std::time::Duration;
+use crate::simple_random::SimpleRng;
 
 pub struct SineWave {
     pub freq: f32,
@@ -51,6 +52,7 @@ struct NoiseBurst {
 impl Iterator for NoiseBurst {
     type Item = f32;
     fn next(&mut self) -> Option<f32> {
+        let mut rng = SimpleRng::new();
         if self.t >= self.duration_samples {
             return None;
         }
@@ -59,7 +61,7 @@ impl Iterator for NoiseBurst {
         let envelope: f32 = 1.0 - progress;
 
         self.t += 1;
-        let sample = rand::random::<f32>() * 2.0 - 1.0; // white noise [-1.0, 1.0]
+        let sample = rng.random_range_f32(-1.0..1.0); // white noise [-1.0, 1.0]
         Some(sample * envelope * 0.4)
     }
 }

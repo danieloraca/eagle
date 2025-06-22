@@ -3,7 +3,7 @@ use crate::sound::{play_noise_boom, play_pitched_tone, saw_wave, square_wave};
 use crate::space_objects::{BigStar, Star};
 use crate::utils::{blend_color, distance_squared, generate_big_star_color};
 use minifb::{Key, Window};
-use rand::Rng;
+use crate::simple_random::SimpleRng;
 
 pub struct GameState {
     pub ship_x: i32,
@@ -29,28 +29,28 @@ pub struct GameState {
 
 impl GameState {
     pub fn new(width: usize, height: usize, num_stars: usize) -> Self {
-        let mut rng = rand::rng();
+        let mut rng = SimpleRng::new();
         let stars: Vec<Star> = (0..num_stars)
             .map(|_| Star {
-                x: rng.random_range(-1.0..1.0),
-                y: rng.random_range(-1.0..1.0),
-                z: rng.random_range(0.1..1.0),
+                x: rng.random_range_f32(-1.0..1.0),
+                y: rng.random_range_f32(-1.0..1.0),
+                z: rng.random_range_f32(0.1..1.0),
             })
             .collect();
 
         let near_stars: Vec<Star> = (0..(num_stars / 2))
             .map(|_| Star {
-                x: rng.random_range(-1.0..1.0),
-                y: rng.random_range(-1.0..1.0),
-                z: rng.random_range(0.1..1.0),
+                x: rng.random_range_f32(-1.0..1.0),
+                y: rng.random_range_f32(-1.0..1.0),
+                z: rng.random_range_f32(0.1..1.0),
             })
             .collect();
 
         let far_stars: Vec<Star> = (0..(num_stars / 2))
             .map(|_| Star {
-                x: rng.random_range(-1.0..1.0),
-                y: rng.random_range(-1.0..1.0),
-                z: rng.random_range(1.0..2.5),
+                x: rng.random_range_f32(-1.0..1.0),
+                y: rng.random_range_f32(-1.0..1.0),
+                z: rng.random_range_f32(1.0..2.5),
             })
             .collect();
 
@@ -104,14 +104,14 @@ impl GameState {
         self.update_particles(buffer, width, height);
 
         // Update and draw starfield
-        let mut rng = rand::rng();
+        let mut rng = SimpleRng::new();
 
         for star in self.stars.iter_mut() {
             star.z -= 0.01;
 
             if star.z <= 0.01 {
-                star.x = rng.random_range(-1.0..1.0);
-                star.y = rng.random_range(-1.0..1.0);
+                star.x = rng.random_range_f32(-1.0..1.0);
+                star.y = rng.random_range_f32(-1.0..1.0);
                 star.z = 1.0;
             }
 
@@ -161,7 +161,7 @@ impl GameState {
         offset_x: f32,
         offset_y: f32,
     ) {
-        let mut rng = rand::rng();
+        let mut rng = SimpleRng::new();
         let ship_x: f32 = self.ship_x as f32 + offset_x;
         let ship_y: f32 = self.ship_y as f32 + offset_y;
 
@@ -196,12 +196,12 @@ impl GameState {
             );
 
             for _ in 0..num_particles {
-                let life: u32 = rng.random_range(50..100);
+                let life: u32 = rng.random_range_u32(50..100);
                 self.particles.push(crate::particles::Particle {
                     x: ship_x,
                     y: ship_y,
-                    vx: rng.random_range(-4.0..4.0),
-                    vy: rng.random_range(-4.0..4.0),
+                    vx: rng.random_range_f32(-4.0..4.0),
+                    vy: rng.random_range_f32(-4.0..4.0),
                     life,
                     initial_life: life,
                 });
@@ -219,7 +219,7 @@ impl GameState {
         height: usize,
         num_particles: usize,
     ) {
-        let mut rng = rand::rng();
+        let mut rng = SimpleRng::new();
 
         // Movement
         if window.is_key_down(Key::Right) && self.ship_x < width as i32 - 3 {
@@ -267,12 +267,12 @@ impl GameState {
                 );
 
                 for _ in 0..num_particles {
-                    let life: u32 = rng.random_range(50..100);
+                    let life: u32 = rng.random_range_u32(50..100);
                     self.particles.push(crate::particles::Particle {
                         x: self.ship_x as f32,
                         y: self.ship_y as f32,
-                        vx: rng.random_range(-4.0..4.0),
-                        vy: rng.random_range(-4.0..4.0),
+                        vx: rng.random_range_f32(-4.0..4.0),
+                        vy: rng.random_range_f32(-4.0..4.0),
                         life,
                         initial_life: life,
                     });
@@ -287,7 +287,7 @@ impl GameState {
     }
 
     pub fn update_big_stars(&mut self, buffer: &mut [u32], width: usize, height: usize) -> usize {
-        let mut rng: rand::prelude::ThreadRng = rand::rng();
+        let mut rng: SimpleRng = SimpleRng::new();
         let mut missed_this_frame: usize = 0;
         
         let seconds: f64 = self.total_seconds as f64;
@@ -306,9 +306,9 @@ impl GameState {
         // }
         while self.big_star_spawned_count < expected_total {
             self.big_stars.push(BigStar {
-                x: rng.random_range(-1.5..1.5),
-                y: rng.random_range(-1.5..1.5),
-                z: 2.5 + rng.random_range(0.0..1.0),
+                x: rng.random_range_f32(-1.5..1.5),
+                y: rng.random_range_f32(-1.5..1.5),
+                z: 2.5 + rng.random_range_f32(0.0..1.0),
                 hit: false,
                 was_missed: false,
             });
@@ -316,7 +316,7 @@ impl GameState {
         }
 
         for star in self.big_stars.iter_mut() {
-            star.z -= rng.random_range(0.002..0.006);
+            star.z -= rng.random_range_f32(0.002..0.006);
 
             // Out of bounds or too close
             let off_screen: bool = star.is_off_screen(width, height);
@@ -328,9 +328,9 @@ impl GameState {
                     star.was_missed = true;
                 }
                 // Respawn
-                star.x = rng.random_range(-1.5..1.5);
-                star.y = rng.random_range(-1.5..1.5);
-                star.z = 2.5 + rng.random_range(0.0..1.0);
+                star.x = rng.random_range_f32(-1.5..1.5);
+                star.y = rng.random_range_f32(-1.5..1.5);
+                star.z = 2.5 + rng.random_range_f32(0.0..1.0);
                 star.hit = false;
                 star.was_missed = false;
                 continue;
@@ -462,12 +462,12 @@ impl GameState {
         height: usize,
         num_particles: usize,
     ) {
-        let mut rng = rand::rng();
+        let mut rng = SimpleRng::new();
         let mut shake_x: i32 = 0;
         let mut shake_y: i32 = 0;
         if self.screen_shake_timer > 0 {
-            shake_x = rng.random_range(-2..=2);
-            shake_y = rng.random_range(-2..=2);
+            shake_x = rng.random_range_f32(-2.0..2.0) as i32;
+            shake_y = rng.random_range_f32(-2.0..2.0) as i32;
             self.screen_shake_timer -= 1;
         }
 
@@ -507,14 +507,14 @@ impl GameState {
 }
 
 fn draw_stars(stars: &mut Vec<Star>, buffer: &mut [u32], width: usize, height: usize, speed: f32) {
-    let mut rng = rand::rng();
+    let mut rng = SimpleRng::new();
 
     for star in stars.iter_mut() {
         star.z -= speed;
 
         if star.z <= 0.01 {
-            star.x = rng.random_range(-1.0..1.0);
-            star.y = rng.random_range(-1.0..1.0);
+            star.x = rng.random_range_f32(-1.0..1.0);
+            star.y = rng.random_range_f32(-1.0..1.0);
             star.z = 1.0;
         }
 

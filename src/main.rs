@@ -8,7 +8,7 @@ use draw_text::{draw_number, draw_text};
 
 mod sound;
 mod utils;
-
+mod simple_random;
 mod space_objects;
 
 mod game_state;
