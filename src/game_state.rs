@@ -166,7 +166,7 @@ impl GameState {
         let ship_y: f32 = self.ship_y as f32 + offset_y;
 
         // Step 1: Find indices of stars to explode
-        let mut to_explode = vec![];
+        let mut to_explode: Vec<usize> = vec![];
 
         for (i, star) in self.big_stars.iter().enumerate() {
             let px: f32 = star.x / star.z * width as f32 / 2.0 + width as f32 / 2.0;
@@ -422,7 +422,15 @@ impl GameState {
         });
     }
 
-    pub fn flash(&mut self, buffer: &mut [u32], draw_x: isize, draw_y: isize, width: usize, height: usize, color: &str) {
+    pub fn flash(
+        &mut self, 
+        buffer: &mut [u32], 
+        draw_x: isize, 
+        draw_y: isize, 
+        width: usize, 
+        height: usize, 
+        color: u32,
+    ) {
         let center_x: usize = draw_x as usize;
         let center_y: usize = draw_y as usize;
         let radius: i32 = (30.0 * (1.0 - self.redemption_flash_timer / 0.7)) as i32;
@@ -437,13 +445,13 @@ impl GameState {
 
                 let fade: u8 = ((self.redemption_flash_timer / 0.3) * 255.0) as u8;
                 match color {
-                    "red" => {
+                    0xFF0000 => {
                         buffer[idx] = (fade as u32) << 16; // Red with fade
                     }
-                    "green" => {
+                    0x00FF00 => {
                         buffer[idx] = (fade as u32) << 8; // Green with fade
                     }
-                    "blue" => {
+                    0x0000FF => {
                         buffer[idx] = fade as u32; // Blue with fade
                     }
                     _ => {

@@ -20,6 +20,10 @@ const NUM_PARTICLES: usize = 40;
 const NUM_STARS: usize = 1000;
 const MAX_ESCAPED: usize = 10;
 
+const _RED: u32 = 0xFF0000;
+const GREEN: u32 = 0x00FF00;
+const _BLUE: u32 = 0x0000FF;
+
 fn main() {
     let mut window: Window = Window::new(
         "Starfield + Ship + Particles - ESC to exit",
@@ -99,7 +103,7 @@ fn main() {
         }
 
         if game.redemption_flash_timer > 0.0 {
-            game.flash(&mut buffer, draw_x, draw_y, WIDTH, HEIGHT, "green");
+            game.flash(&mut buffer, draw_x, draw_y, WIDTH, HEIGHT, self::GREEN);
         }
 
         // --- Update window buffer ---
