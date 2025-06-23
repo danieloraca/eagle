@@ -33,3 +33,32 @@ pub fn generate_big_star_color() -> u32 {
     // );
 
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_blend_color_full_alpha() {
+        let color = blend_color(255, 128, 64, 1.0);
+        assert_eq!(color, (255 << 16) | (128 << 8) | 64);
+    }
+
+    #[test]
+    fn test_blend_color_half_alpha() {
+        let color = blend_color(200, 100, 50, 0.5);
+        assert_eq!(color, ((100 as u32) << 16) | ((50 as u32) << 8) | 25);
+    }
+
+    #[test]
+    fn test_blend_color_zero_alpha() {
+        let color = blend_color(255, 255, 255, 0.0);
+        assert_eq!(color, 0);
+    }
+
+    #[test]
+    fn test_blend_color_rounding() {
+        let color = blend_color(51, 102, 153, 0.5);
+        assert_eq!(color, (25 << 16) | (51 << 8) | 76); // floor rounding
+    }
+}
