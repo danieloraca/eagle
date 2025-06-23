@@ -18,20 +18,6 @@ pub fn generate_big_star_color() -> u32 {
     let b = rng.random_u8() % 255; // Blue component
     let alpha = rng.random_range_f32(0.5..1.0); // Alpha between 0.5 and 1.0
     blend_color(r, g, b, alpha) // Blend with alpha 0.5 for a softer color
-
-    //     let color: u32 = blend_color(
-    //     rng.random_range(150..250),
-    //     rng.random_range(100..200),
-    //     rng.random_range(0..250),
-    //     rng.random_range(0.7..1.0),
-    // );
-    // let color: u32 = blend_color(
-    //     rng.random_range(200..255), // Red: bright
-    //     rng.random_range(0..100),   // Green: low
-    //     rng.random_range(150..255), // Blue: bright
-    //     rng.random_range(0.7..1.0), // Alpha
-    // );
-
 }
 
 #[cfg(test)]
@@ -60,5 +46,42 @@ mod tests {
     fn test_blend_color_rounding() {
         let color = blend_color(51, 102, 153, 0.5);
         assert_eq!(color, (25 << 16) | (51 << 8) | 76); // floor rounding
+    }
+
+    #[test]
+    fn test_distance_squared() {
+        // Zero distance
+        assert_eq!(distance_squared(0.0, 0.0, 0.0, 0.0), 0.0);
+
+        // Horizontal distance
+        assert_eq!(distance_squared(0.0, 0.0, 3.0, 0.0), 9.0);
+
+        // Vertical distance
+        assert_eq!(distance_squared(0.0, 0.0, 0.0, 4.0), 16.0);
+
+        // Pythagorean triple
+        assert_eq!(distance_squared(0.0, 0.0, 3.0, 4.0), 25.0);
+
+        // Negative coordinates
+        assert_eq!(distance_squared(-1.0, -1.0, 2.0, 3.0), 25.0);
+    }
+
+    #[test]
+    fn test_generate_big_star_color_valid_range() {
+        for _ in 0..100 {
+            let color = generate_big_star_color();
+            // Color is ARGB packed into a u32; we expect RGB components only, so max 0xFFFFFF
+            assert!(color <= 0xFFFFFF);
+        }
+    }
+
+    #[test]
+    fn test_generate_big_star_color_variability() {
+        let mut seen = std::collections::HashSet::new();
+        for _ in 0..100 {
+            seen.insert(generate_big_star_color());
+        }
+        // Expect at least, say, 50 unique colors in 100 calls
+        assert!(seen.len() > 50, "Too little variation in generated colors");
     }
 }
